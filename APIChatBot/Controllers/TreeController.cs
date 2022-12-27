@@ -1,4 +1,5 @@
 ﻿using APIChatBot.Data;
+using APIChatBot.DTO;
 using APIChatBot.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -31,9 +32,20 @@ namespace APIChatBot.Controllers
         }
 
         [HttpGet("GetChildrenByParentId")]
-        public IEnumerable<Tree> GetChildrenByParentId(int id)
+        public IEnumerable<TreeDto> GetChildrenByParentId(int id)
         {
-            return _context.Tree.Where(a => a.ParentId == id);
+            var trees = _context.Tree.Where(a => a.ParentId == id).ToList();
+            var treesDto = new List<TreeDto>();
+            foreach (var item in trees)
+            {
+                TreeDto treeDto = new TreeDto();
+                treeDto.Id = item.Id;
+                treeDto.Name = item.Name;
+                treeDto.ParentId = item.ParentId;
+                treeDto.HasChildren = _context.Tree.Any(a => a.ParentId == item.Id) ? true : false;
+                treesDto.Add(treeDto);
+            }
+            return treesDto;    
         }
 
         [HttpGet("HaveChildren")]
